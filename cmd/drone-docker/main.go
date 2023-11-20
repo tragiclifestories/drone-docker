@@ -14,9 +14,7 @@ import (
 	"github.com/drone-plugins/drone-plugin-lib/drone"
 )
 
-var (
-	version = "unknown"
-)
+var version = "unknown"
 
 func main() {
 	// Load env-file if it exists first
@@ -165,6 +163,11 @@ func main() {
 			Name:   "cache-from",
 			Usage:  "images to consider as cache sources",
 			EnvVar: "PLUGIN_CACHE_FROM",
+		},
+		cli.StringSliceFlag{
+			Name:   "cache-to",
+			Usage:  "destinations for cache layer exports",
+			EnvVar: "PLUGIN_CACHE_TO",
 		},
 		cli.BoolFlag{
 			Name:   "squash",
@@ -336,6 +339,7 @@ func run(c *cli.Context) error {
 			Squash:      c.Bool("squash"),
 			Pull:        c.BoolT("pull-image"),
 			CacheFrom:   c.StringSlice("cache-from"),
+			CacheTo:     c.StringSlice("cache-to"),
 			Compress:    c.Bool("compress"),
 			Repo:        c.String("repo"),
 			Labels:      c.StringSlice("custom-labels"),

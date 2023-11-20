@@ -56,6 +56,7 @@ type (
 		Squash      bool     // Docker build squash
 		Pull        bool     // Docker build pull
 		CacheFrom   []string // Docker build cache-from
+		CacheTo     []string // Docker build cache-to
 		Compress    bool     // Docker build compress
 		Repo        string   // Docker build repository
 		LabelSchema []string // label-schema Label map
@@ -151,10 +152,10 @@ func (p Plugin) Exec() error {
 
 	// create Auth Config File
 	if p.Login.Config != "" {
-		os.MkdirAll(dockerHome, 0600)
+		os.MkdirAll(dockerHome, 0o600)
 
 		path := filepath.Join(dockerHome, "config.json")
-		err := os.WriteFile(path, []byte(p.Login.Config), 0600)
+		err := os.WriteFile(path, []byte(p.Login.Config), 0o600)
 		if err != nil {
 			return fmt.Errorf("Error writing config.json: %s", err)
 		}
@@ -347,6 +348,9 @@ func commandBuild(build Build) *exec.Cmd {
 	}
 	for _, arg := range build.CacheFrom {
 		args = append(args, "--cache-from", arg)
+	}
+	for _, arg := range build.CacheTo {
+		args = append(args, "--cache-to", arg)
 	}
 	for _, arg := range build.ArgsEnv {
 		addProxyValue(&build, arg)
@@ -566,11 +570,11 @@ func writeSSHPrivateKey(key string) (path string, err error) {
 	if err != nil {
 		return "", fmt.Errorf("unable to determine home directory: %s", err)
 	}
-	if err := os.MkdirAll(filepath.Join(home, ".ssh"), 0700); err != nil {
+	if err := os.MkdirAll(filepath.Join(home, ".ssh"), 0o700); err != nil {
 		return "", fmt.Errorf("unable to create .ssh directory: %s", err)
 	}
 	pathToKey := filepath.Join(home, ".ssh", "id_rsa")
-	if err := os.WriteFile(pathToKey, []byte(key), 0400); err != nil {
+	if err := os.WriteFile(pathToKey, []byte(key), 0o400); err != nil {
 		return "", fmt.Errorf("unable to write ssh key %s: %s", pathToKey, err)
 	}
 	path = fmt.Sprintf("default=%s", pathToKey)
